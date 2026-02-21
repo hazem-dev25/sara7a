@@ -13,6 +13,14 @@ const mood = process.env.DB_MOOD
 
 const jwtKey = process.env.DB_JWT_KEY
 
+const jwtAdminKey = process.env.DB_JWT_ADMIN_KEY
+
+const jwtUserKey = process.env.DB_JWT_USER_KEY
+
+const jwtRefreshTokenAdmin = process.env.JWT_REFRESH_TOKEN_ADMIN
+
+const jwtRefreshTokenUser = process.env.JWT_REFRESH_TOKEN_USER
+
 
 
 export {
@@ -20,5 +28,9 @@ export {
     key , 
     port , 
     mood , 
-    jwtKey 
+    jwtKey  , 
+    jwtAdminKey ,
+    jwtUserKey ,
+    jwtRefreshTokenAdmin ,
+    jwtRefreshTokenUser
 }

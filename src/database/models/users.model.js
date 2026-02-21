@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import cryptojs from 'crypto-js' 
 import { key} from "../../../config/index.js";
 import bcrypt from 'bcrypt'
-import { Gender, provider } from "../../common/enums/index.js";
+import { Gender, provider, userRole } from "../../common/enums/index.js";
 
 
 const userschema  = mongoose.Schema({
@@ -54,6 +54,11 @@ const userschema  = mongoose.Schema({
         type: String , 
         enum: Object.values(provider) , 
         default: provider.system
+    } , 
+    role: {
+        type: String , 
+        enum: Object.values(userRole) , 
+        default: userRole.user ,
     }
 } , { toJSON: {getters: true }}) 
 

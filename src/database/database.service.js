@@ -62,7 +62,6 @@ export const findById = async ({
  populate = {}
 }) =>{
 
-    let query = model.findById(id)
 
     if (select.length) {
         query = query.select(select)

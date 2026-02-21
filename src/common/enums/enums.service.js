@@ -1,12 +1,18 @@
 export const Gender =  {
-    male: 'male' ,
-    female: 'female'
+    male: 0 ,
+    female: 1
 }
 
 
 export const provider = { 
-    system: 'system' , 
-    google: 'google' , 
-    facebook : 'facebook' , 
-    github: 'github'
+    system: 0 , 
+    google: 1 , 
+    facebook : 2 , 
+    github: 3
+ }
+
+
+ export const userRole = {
+    admin: 0 ,
+    user: 1
  }
