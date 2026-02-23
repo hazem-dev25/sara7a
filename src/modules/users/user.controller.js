@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { signUp } from "./user.service.js";
-import { success } from "../../common/utils/reseponce/index.js";
+import { BadRequest, success } from "../../common/utils/reseponce/index.js";
 import { getaLL } from "./user.service.js";
 import { updateById } from "./user.service.js";
 import { deleteUser } from "./user.service.js";
@@ -8,15 +8,17 @@ import { userLogin } from "./user.service.js";
 import { auth } from "../../common/middleware/auth.js";
 import { decodedRefreshT } from "./user.service.js";
 import { logOut } from "./user.service.js";
+import { validation } from "../../common/utils/reseponce/validation.js";
+import { signUpSchima } from "./user.validation.js";
 
 
 export const router = Router()
 
 
-router.post('/signup' , async (req ,res)=>{
+router.post('/signup' ,  validation(signUpSchima), async (req ,res)=>{
     let userData = await signUp(req.body)
     if(userData){
-        success({res, data: userData, message: "user added succ", status: 201})
+        success({res, message: "user added succ", status: 201})
         return
     }else{
         res.json({message: "failed to add user"})

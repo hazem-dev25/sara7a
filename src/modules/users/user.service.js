@@ -26,11 +26,12 @@ export const signUp = async (data)=>{
 
 
 export const userLogin = async (data , host)=>{
-   let {email , password} = data
+   let {email ,phone ,  password} = data
     let userData = await findOne({model: userModel , filter: {email} , select: "+password"})
+    console.log(userData)
     if(userData){
      let {acssesToken , refreshToken} = generateToken(userData , host)           
-     let isvalid = bcrypt.compare(userData.password , password)
+     let isvalid = await bcrypt.compare(password , userData.password)
      if(isvalid){
       return {
           userData , 
