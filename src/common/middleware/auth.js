@@ -5,6 +5,9 @@ import { unauthorized } from "../utils/reseponce/Error.response.js"
 
 export const auth = async (req , res , next)=>{
  let {authorization} = req.headers
+ if(!authorization){
+  unauthorized({message: 'unauthorized token'})
+ }
  let [flag , token] = authorization.split(" ")
  const exist = await BlackListModle.findOne({token})
  if(exist){

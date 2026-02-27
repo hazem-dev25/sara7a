@@ -1,14 +1,13 @@
-import { BadRequest } from "./Error.response.js"
+import {BadRequest} from './Error.response.js'
 
 
 
-
-export const validation = (schima)=>{
-    return (req ,res ,next)=>{
-        let {error , value} = schima.validate(req.body , {abortEarly: false})
-                if(error){
-                    throw BadRequest({message: "error validation",extra: error })
-                }
+export const validation = (Schema)=>{
+    return (req ,res, next)=>{
+        let {value , error} = Schema.validate(req.body , {abortEarly: false})
+        if(error){
+            BadRequest({message: "validation error" , extra: error})
+        }
         next()
     }
 }

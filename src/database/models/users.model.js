@@ -59,6 +59,10 @@ const userschema  = mongoose.Schema({
         type: String , 
         enum: Object.values(userRole) , 
         default: userRole.user ,
+    } , 
+    profileViews: {
+        type: Number ,
+        default: 0
     }
 } , { toJSON: {getters: true }}) 
 

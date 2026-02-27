@@ -9,7 +9,8 @@ import { auth } from "../../common/middleware/auth.js";
 import { decodedRefreshT } from "./user.service.js";
 import { logOut } from "./user.service.js";
 import { validation } from "../../common/utils/reseponce/validation.js";
-import { signUpSchima } from "./user.validation.js";
+import { loginSchima, signUpSchima } from "./user.validation.js";
+
 
 
 export const router = Router()
@@ -18,7 +19,7 @@ export const router = Router()
 router.post('/signup' ,  validation(signUpSchima), async (req ,res)=>{
     let userData = await signUp(req.body)
     if(userData){
-        success({res, message: "user added succ", status: 201})
+        success({res, message: "user added succ", status: 201 , data: userData})
         return
     }else{
         res.json({message: "failed to add user"})
@@ -27,7 +28,7 @@ router.post('/signup' ,  validation(signUpSchima), async (req ,res)=>{
 })
 
 
-router.post('/login' , async (req, res)=>{
+router.post('/login' , validation(loginSchima) ,async (req, res)=>{
     let user = await userLogin(req.body  , `${req.protocol}//${req.host}`)
     if(user){
         success({res , data: user , message: "login success" , status: 200})
@@ -72,3 +73,12 @@ router.post('/logout' , auth ,async (req, res)=>{
     console.log(tokenData)
     success({res , data: tokenData , massege: "login out success" , status: 200})
 })
+
+
+router.post('/profile/:id', auth, async (req, res) => {
+    let userData = await profileV(req.params.id)
+   success({ res, data: userData  })
+})
+
+
+

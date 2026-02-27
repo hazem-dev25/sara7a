@@ -10,7 +10,8 @@ import jwt from 'jsonwebtoken'
 
 
 export const signUp = async (data)=>{
-    let {name , email , password , phone} = data
+    console.log(data)
+    let {name , email , password } = data
     
     let exist = await findOne({model: userModel , filter: {email}})
 
@@ -18,7 +19,7 @@ export const signUp = async (data)=>{
         Conflict({message: "email is already exist" , status: 409})
     }
 
-    let userData = await insertOne({model: userModel , data: {name , email , password , phone}})
+    let userData = await insertOne({model: userModel , data: {name , email , password }})
 
     return userData
 
@@ -89,4 +90,19 @@ export const logOut = async (token)=>{
     console.log(token)
     let tokenData = await insertOne({model: BlackListModle , data: {token}})
     return tokenData
+}
+
+
+
+export const profileV = async(id)=>{
+    let userviews =  await userModel.findByIdAndUpdate(id, {
+          $inc: { profileViews: 1 }
+       })
+       if(userviews){
+        return userviews
+    }else{
+        NotFound({message: 'user is not found'})
+}
+    const user = await findById({ model: userModel, id })
+    return user   
 }
