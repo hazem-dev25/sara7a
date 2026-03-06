@@ -10,8 +10,9 @@ export const signUpSchima = Joi.object({
                 "number.max": "age must be lessthan 50"
             }) ,
             password: Joi.string().min(5).max(15).required(),
-            users: Joi.array().items(Joi.string()).max(3).optional()
-        })
+            users: Joi.array().items(Joi.string()).max(3).optional(),
+            profileName: Joi.string().required() 
+        }).options({ allowUnknown: true }); 
 
 
 

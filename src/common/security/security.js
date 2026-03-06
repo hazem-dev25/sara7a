@@ -59,6 +59,7 @@ export const decodedToken =  (decode , token)=>{
 
 export const decodedRefreshToken =  (token)=>{
     let decode = jwt.decode(token)
+    console.log(decode)
    let segnatureRefresh= undefined
    switch (decode.aud) {
     case"admin":

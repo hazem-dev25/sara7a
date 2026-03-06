@@ -1,17 +1,24 @@
-import {Conflict, NotFound, unauthorized} from '../../common/utils/reseponce/index.js'
+import {BadRequest, Conflict, NotFound, unauthorized} from '../../common/utils/reseponce/index.js'
 import {BlackListModle, findByIdAndDelete, findByIdAndUpdate, userModel} from '../../database/index.js'
-import bcrypt from 'bcrypt'
+import bcrypt, { compare } from 'bcrypt'
 import {findOne , insertOne , find } from '../../database/index.js'
 import { decodedRefreshToken, generateToken } from '../../common/security/security.js'
-import { jwtAdminKey, jwtUserKey } from '../../../config/env.service.js'
+import { host, jwtAdminKey, jwtUserKey } from '../../../config/env.service.js'
 import jwt from 'jsonwebtoken'
 
 
 
 
-export const signUp = async (data)=>{
-    console.log(data)
-    let {name , email , password } = data
+export const signUp = async (data , file)=>{
+     let size = file.size 
+        if(size > 1000000){
+            throw BadRequest({message: 'file size is too large'})
+        }
+    if(!file){  
+        BadRequest({message: "image is required!"})
+    }
+ 
+    let {name , email , password , profileName , age  } = data
     
     let exist = await findOne({model: userModel , filter: {email}})
 
@@ -19,31 +26,33 @@ export const signUp = async (data)=>{
         Conflict({message: "email is already exist" , status: 409})
     }
 
-    let userData = await insertOne({model: userModel , data: {name , email , password }})
+    let userData = await insertOne({model: userModel , data: {name , email , password  , age,  profileName ,  image: file.path} ,})
 
     return userData
 
 }
 
 
-export const userLogin = async (data , host)=>{
-   let {email ,phone ,  password} = data
-    let userData = await findOne({model: userModel , filter: {email} , select: "+password"})
-    console.log(userData)
-    if(userData){
-     let {acssesToken , refreshToken} = generateToken(userData , host)           
-     let isvalid = await bcrypt.compare(password , userData.password)
-     if(isvalid){
-      return {
-          userData , 
-            acssesToken ,
-            refreshToken    
-      }
-     }else{
-        NotFound({message: "user is not found" , status: 404})
-    }  
-}}
+export const loginU = async (data , host)=>{
+    let {email , password } = data
+    let user = await findOne({model: userModel , filter: {email} , select: '+password'})
+    if(!user){
+        NotFound({message: "user not found"})
+    }
 
+    let passV = await compare(password  , user.password)
+    if(!passV){
+        BadRequest({message: "email or password is wrong!"})
+    }
+
+    let {acssesToken , refreshToken} = generateToken(user , host)
+
+    return {
+        user ,
+        acssesToken ,
+        refreshToken
+    }
+}
 
 export const getaLL =  async (userid)=>{  
     let users = await findOne({model: userModel , filter: {_id: userid} , select: "-password"})
@@ -68,6 +77,7 @@ export const deleteUser = async (id)=>{
 
 export const decodedRefreshT = async (token)=>{
     let decode = decodedRefreshToken(token)
+    console.log(decode.aud)
     let segnature = undefined
     switch (decode.aud) {
         case "admin":
@@ -80,7 +90,7 @@ export const decodedRefreshT = async (token)=>{
     }
     let verifay = jwt.sign({id: decode.id} , segnature ,{
         expiresIn: "30m" ,
-        audience: decode.aud 
+        audience: decode.aud
     })
     return verifay
 }
@@ -95,9 +105,7 @@ export const logOut = async (token)=>{
 
 
 export const profileV = async(id)=>{
-    let userviews =  await userModel.findByIdAndUpdate(id, {
-          $inc: { profileViews: 1 }
-       })
+    let userviews =  await userModel.findByIdAndUpdate(id, {  $inc: { profileViews: 1 } })
        if(userviews){
         return userviews
     }else{

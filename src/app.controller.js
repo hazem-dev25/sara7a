@@ -1,9 +1,10 @@
 import express from 'express'
 import { connectionDB } from './database/index.js'
-import { router } from './modules/users/user.controller.js'
+import { router } from './modules/auth/auth.controller.js'
 import {MessageRouter} from '../src/modules/messages/message.controller.js'
 import { port } from '../config/index.js'
 import { globalErrorHandler } from './common/utils/reseponce/index.js'
+import {userRouter} from './modules/users/users.controller.js'
 
 
 export const bootstrab = async ()=>{
@@ -16,6 +17,10 @@ export const bootstrab = async ()=>{
     app.use(MessageRouter)
 
     app.use(globalErrorHandler)
+
+    app.use(userRouter)
+
+    app.use('/uploads', express.static('uploads'))
 
     app.use('{$dummy}' , (req , res)=>{
         res.json({message: "invalid route"})

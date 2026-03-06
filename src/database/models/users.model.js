@@ -63,6 +63,15 @@ const userschema  = mongoose.Schema({
     profileViews: {
         type: Number ,
         default: 0
+    } , 
+    profileName: {
+        type: String ,
+        required: true ,
+        unique: true
+    } , 
+    image: {
+        type: String ,
+        optional: true
     }
 } , { toJSON: {getters: true }}) 
 
