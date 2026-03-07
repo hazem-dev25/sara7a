@@ -6,7 +6,7 @@ import { getUrl } from "./users.service.js";
 import { getProfile } from "./users.service.js";
 import { updateProfile } from "./users.service.js";
 import { multerSend } from "../../common/middleware/multer.js";
-
+import { deleteProfile } from "./users.service.js";
 
  export const userRouter = Router()
 
@@ -33,5 +33,10 @@ userRouter.patch('/update_profile' ,multerSend({custompath: 'update/profile'}).s
     success({res , data: data , message: 'update user profile success' , status: 200})
 })
 
+
+userRouter.delete('/delete_profile' , auth , async (req ,res)=>{
+    let data = await deleteProfile(req.userid)
+    success({res , data: data , message: 'delete user profile success' , status: 200})
+})
 
 

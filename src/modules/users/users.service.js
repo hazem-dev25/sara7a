@@ -1,6 +1,6 @@
 import { NotFound } from '../../common/utils/reseponce/index.js '
 import { userModel } from '../../database/models/users.model.js'
-import { findById, findByIdAndUpdate, findOne } from '../../database/database.service.js'
+import { findById, findByIdAndDelete, findByIdAndUpdate, findOne } from '../../database/database.service.js'
 import { BadRequest } from '../../common/utils/reseponce/Error.response.js'
 
 
@@ -54,3 +54,12 @@ export const updateProfile = async (data , id , file)=>{
 }
 
 
+
+export const deleteProfile = async (id)=>{
+    let user = await findById({model: userModel , id: id})
+    if(!user){
+        NotFound({message: 'user is not exist'})
+    }
+    let deletedUser = await findByIdAndDelete({model: userModel , id: id})
+    return deletedUser
+}

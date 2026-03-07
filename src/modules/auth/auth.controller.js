@@ -78,6 +78,7 @@ router.post('/profile/:id', auth, async (req, res) => {
 })
 
 
+// test multer
 
 router.post('/test'  , multerSend({custompath: 'posts/profile/local'}).single('image') , (req ,res)=>{
     req.file.filepath = `${req.file.destination}/${req.file.filename}`
