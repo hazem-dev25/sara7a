@@ -21,7 +21,11 @@ const jwtRefreshTokenAdmin = process.env.JWT_REFRESH_TOKEN_ADMIN
 
 const jwtRefreshTokenUser = process.env.JWT_REFRESH_TOKEN_USER
 
+const redisUrl = process.env.REDIS_URL
 
+const app_password = process.env.APP_PASSWORD
+
+const app_email = process.env.APP_EMAIL
 
 export {
     host , 
@@ -32,5 +36,8 @@ export {
     jwtAdminKey ,
     jwtUserKey ,
     jwtRefreshTokenAdmin ,
-    jwtRefreshTokenUser
+    jwtRefreshTokenUser , 
+    redisUrl ,
+    app_password ,
+    app_email
 }

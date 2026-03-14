@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
 import { decodedToken } from "../security/security.js"
-import { BlackListModle } from "../../database/index.js"
 import { unauthorized } from "../utils/reseponce/Error.response.js"
+import { get } from "../../database/redis/redis.service.js"
 
 export const auth = async (req , res , next)=>{
  let {authorization} = req.headers
@@ -9,10 +9,6 @@ export const auth = async (req , res , next)=>{
   unauthorized({message: 'unauthorized token'})
  }
  let [flag , token] = authorization.split(" ")
- const exist = await BlackListModle.findOne({token})
- if(exist){
-   return unauthorized({message:"token expired"})
-  }
   switch (flag) {
     case "Basic":
       let data = Buffer.from(token , 'base64').toString()
@@ -22,10 +18,15 @@ export const auth = async (req , res , next)=>{
     case "Bearer":
       let decode = jwt.decode(token)
       let verify = decodedToken(decode , token)
+      let revoke =  await get(`revokeKey::${verify.id}::${token}`)
+      if(revoke){
+       throw new Error ('user is alredy logout')
+      }
       req.userid = verify.id
+      req.token = token
+      req.decode = decode
       break;
   }
- 
    next() 
 }
 

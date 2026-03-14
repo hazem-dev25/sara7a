@@ -5,6 +5,8 @@ import {MessageRouter} from '../src/modules/messages/message.controller.js'
 import { port } from '../config/index.js'
 import { globalErrorHandler } from './common/utils/reseponce/index.js'
 import {userRouter} from './modules/users/users.controller.js'
+import { connectionRedis, del, get } from './database/redis/index.js'
+import { set } from './database/redis/index.js'
 
 
 export const bootstrab = async ()=>{
@@ -20,6 +22,8 @@ export const bootstrab = async ()=>{
 
     app.use(userRouter)
 
+    await connectionRedis()
+
     app.use('/uploads', express.static('uploads'))
 
     app.use('{$dummy}' , (req , res)=>{
@@ -31,4 +35,6 @@ export const bootstrab = async ()=>{
     app.listen(port , ()=>{
         console.log('server is running succ')
     })
+
+    
 }

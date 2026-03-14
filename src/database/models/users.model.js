@@ -72,7 +72,11 @@ const userschema  = mongoose.Schema({
     image: {
         type: String ,
         optional: true
-    }
+    } ,
+    isvarify: {
+        type: Boolean ,
+        default: false
+    } 
 } , { toJSON: {getters: true }}) 
 
 

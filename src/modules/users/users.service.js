@@ -2,17 +2,26 @@ import { NotFound } from '../../common/utils/reseponce/index.js '
 import { userModel } from '../../database/models/users.model.js'
 import { findById, findByIdAndDelete, findByIdAndUpdate, findOne } from '../../database/database.service.js'
 import { BadRequest } from '../../common/utils/reseponce/Error.response.js'
+import { get, set } from '../../database/redis/redis.service.js'
 
 
-
+let genkey = (id)=>{
+     return `profileData::${id}`
+}
 
 export const userProfile = async (id)=>{
+    await get(genkey(id)) 
     let userData = await findOne({model: userModel , filter: {_id: id} , select: ("name email password")})
-    if(userData){
-        return userData
-    }else{
+    if(!userData){
         throw  NotFound({message: 'user not found'})
+    }else{
+       await set({
+            key: genkey(id), 
+            value: userData,
+            ttl: 60
+        })
     }
+    return userData
 }
 
 
@@ -47,6 +56,11 @@ export const updateProfile = async (data , id , file)=>{
     }
     if (user.role == '1') {
         let updateuser = await findByIdAndUpdate({model: userModel  , id: id , update: {name , email , image: file.path}})
+        set({
+            key: genkey(id) ,
+            value: updateuser ,
+            ttl: 60
+        })
         return updateuser
     }else{
         BadRequest({message: 'you are not the user'})

@@ -1,10 +1,12 @@
 import {BadRequest, Conflict, NotFound, unauthorized} from '../../common/utils/reseponce/index.js'
-import {BlackListModle, findByIdAndDelete, findByIdAndUpdate, userModel} from '../../database/index.js'
+import { findByIdAndDelete, findByIdAndUpdate, userModel} from '../../database/index.js'
 import bcrypt, { compare } from 'bcrypt'
-import {findOne , insertOne , find } from '../../database/index.js'
+import {findOne , insertOne } from '../../database/index.js'
 import { decodedRefreshToken, generateToken } from '../../common/security/security.js'
 import { host, jwtAdminKey, jwtUserKey } from '../../../config/env.service.js'
 import jwt from 'jsonwebtoken'
+import { set} from '../../database/redis/redis.service.js'
+import {event } from '../../common/utils/email/email.event.js'
 
 
 
@@ -27,11 +29,27 @@ export const signUp = async (data , file)=>{
     }
 
     let userData = await insertOne({model: userModel , data: {name , email , password  , age,  profileName ,  image: file.path} ,})
+   
+    event.emit('sendEmail' , {email , userID: userData._id , name})
 
     return userData
-
 }
 
+
+export const verifyEmail = async (data, host)=>{
+    console.log(host)
+    let {email ,code } = data
+    let user = await findOne({model: userModel , filter: {email}})
+
+    if(!user){
+        NotFound({message: "user not found"})
+    }
+
+  event.emit('varifyemail' , {code , email , userID: user._id , user, host})
+
+
+    return user
+}
 
 export const loginU = async (data , host)=>{
     let {email , password } = data
@@ -53,6 +71,37 @@ export const loginU = async (data , host)=>{
         refreshToken
     }
 }
+
+
+export const forgetPassword = async (data ,id)=>{
+    let {email} = data
+
+    let user = await findOne({model: userModel , filter: {email}})
+
+    if(!user){
+        NotFound({message: "user not found"})
+    }
+
+    event.emit('forgetPassword' , {email , userID: id , user})
+
+    return user
+}
+
+
+export const resetPassword = async (data , host , id)=>{
+    let {email , password , code} = data
+
+    let user = await findOne({model: userModel , filter: {email}})
+
+    if(!user){
+        BadRequest({message: "user is not found"})
+    }
+
+    event.emit('resetPassword' , {code , password , userID: id , email , user , host})
+
+    return user
+}
+
 
 export const getaLL =  async (userid)=>{  
     let users = await findOne({model: userModel , filter: {_id: userid} , select: "-password"})
@@ -96,10 +145,14 @@ export const decodedRefreshT = async (token)=>{
 }
 
 
-export const logOut = async (token)=>{
-    console.log(token)
-    let tokenData = await insertOne({model: BlackListModle , data: {token}})
-    return tokenData
+export const logout = async (req)=>{
+   let revokeKey = `revokeKey::${req.userid}::${req.token}`
+   await set({
+        key: revokeKey ,
+        value: 1 , 
+        ttl: req.decode.iat + 30 * 60
+    })
+    return 
 }
 
 

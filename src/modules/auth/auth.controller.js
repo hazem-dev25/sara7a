@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { signUp } from "./auth.service.js";
+import { forgetPassword, resetPassword, signUp } from "./auth.service.js";
 import { BadRequest, success } from "../../common/utils/reseponce/index.js";
 import { getaLL } from "./auth.service.js";
 import { updateById } from "./auth.service.js";
@@ -7,17 +7,16 @@ import { deleteUser } from "./auth.service.js";
 import { loginU } from "./auth.service.js";
 import { auth } from "../../common/middleware/auth.js";
 import { decodedRefreshT } from "./auth.service.js";
-import { logOut } from "./auth.service.js";
+import { logout} from "./auth.service.js";
 import { validation } from "../../common/utils/reseponce/validation.js";
 import { loginSchima, signUpSchima } from "./auth.validation.js";
 import { profileV } from "./auth.service.js";
 import { multerSend } from "../../common/middleware/multer.js";
+import { verifyEmail } from "./auth.service.js";
 
 
 
 export const router = Router()
-
-
 
 
 router.post('/signup' ,multerSend({custompath: 'profile/signup'}).single("image") , validation(signUpSchima), async (req ,res)=>{
@@ -32,9 +31,45 @@ router.post('/signup' ,multerSend({custompath: 'profile/signup'}).single("image"
 })
 
 
+router.post('/verify_email' , async (req ,res)=>{
+    let isvarify = await verifyEmail(req.body ,req.host)
+    if(isvarify){
+        success({res, message: "email verified succ", status: 200})
+        return
+    }else{
+        res.json({message: "failed to verify email"})
+        return
+    }
+})
+
 router.post('/login' , validation(loginSchima) , async(req ,res)=>{
     let userData = await loginU(req.body , `${req.protocol}${req.host}`)
     success({res, data: userData , message: 'user login success' , status: 200})
+})
+
+
+router.post('/forget_password'   , auth , async (req ,res)=>{
+    let userData = await forgetPassword(req.body , req.userid)
+    if(userData){
+        success({res , message: "check your email to reset password" , status: 200})
+        return
+    }else{
+        res.json({message: "failed to send email"})
+        return
+    }
+})
+
+
+router.patch('/reset_password' , auth,  async (req ,res)=>{
+    let data = await resetPassword(req.body , req.host , req.userid)
+    
+    if(data){
+        success({res , message: "password reset successfully" , status: 200})
+        return
+    }else{
+        res.json({message: "failed to reset password"})
+        return
+    }
 })
 
 
@@ -65,10 +100,8 @@ router.get('/acsses_new_token' , async (req , res)=>{
 
 
 router.post('/logout' , auth ,async (req, res)=>{
-    const token = req.headers.authorization?.split(" ")[1]
-    let tokenData  = await logOut(token)
-    console.log(tokenData)
-    success({res , data: tokenData , massege: "login out success" , status: 200})
+    let data = await logout(req)
+     success({res , data: data , message: "logout succfuly" , status: 200})
 })
 
 
